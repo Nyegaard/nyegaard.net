@@ -3,87 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>You found something, but it aint it.</title>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f8;
-  overflow: hidden;
-}
+  <title>Not Found?</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f8;
+      overflow: hidden;
+    }
 
-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
 
-.message-bubble {
-  background-color: #ffffff;
-  border-radius: 1em;
-  padding: 1em 2em;
-  margin-top: 5vh;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  font-size: 1.25rem;
-  text-align: center;
-  max-width: 80%;
-}
+    .message-bubble {
+      background-color: #ffffff;
+      border-radius: 1em;
+      padding: 1em 2em;
+      margin-top: 5vh;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      font-size: 1.25rem;
+      text-align: center;
+      max-width: 80%;
+    }
 
-.image-container {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-height: 75vh;
-  width: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
-}
+    .image-container {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 75vh;
+      width: 100%;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
 
-img {
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  border-radius: 1em;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  animation: float 3s ease-in-out infinite;
-  transition: transform 0.3s ease;
-}
+    img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 1em;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      animation: float 3s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
 
-img:hover {
-  transform: rotate(-2deg) scale(1.03);
-}
+    img:hover {
+      transform: rotate(-2deg) scale(1.03);
+    }
 
+    @keyframes float {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
 
-@keyframes float {
-  0%   { transform: translateY(0px); }
-  50%  { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-@media (max-width: 600px) {
-  .message-bubble {
-    font-size: 1rem;
-    padding: 0.75em 1.5em;
-  }
-}
-
+    @media (max-width: 600px) {
+      .message-bubble {
+        font-size: 1rem;
+        padding: 0.75em 1.5em;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="message-bubble">
     This page is probably not what you're searching for.
   </div>
+
   <div class="image-container">
     <img src="cat.png" alt="Detective cat looking under a carpet" />
   </div>
+
+  <!-- 💬 Zisson Chat Widget -->
   <script type="text/javascript">
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('data-jwt', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0b21lcklkIjoiNzE1IiwiY3VzdG9tZXJHdWlkIjoiN2JjMzZiMDEtNTExMC00NGM3LThiODAtMjRkZDMxNGNkNDU4IiwiZW50cnlQb2ludEd1aWQiOiI1NWRhN2UzYi1mMjQ3LTQ3YzMtYTNiYy0wZjAzZTJhMTdhOGQiLCJuYmYiOjE3NDM2Nzg0NzAsImV4cCI6MTkwMTQ0NDg3MCwiaWF0IjoxNzQzNjc4NDcwLCJpc3MiOiJ6aXNzb24iLCJhdWQiOiJ3YXZlQ2hhdCJ9.USsWrGUc__yqoXnKoF-4ZcdGC_20bNoVCX2t739gjRI');
     script.setAttribute('src', 'https://chat2.zisson.com/bootstrapper.js');
     document.body.appendChild(script);
-</script>
+  </script>
 </body>
 </html>
