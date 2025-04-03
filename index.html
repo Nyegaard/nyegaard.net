@@ -4,47 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>You found something, but it aint it.</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f8;
+  overflow: hidden;
+}
 
-    .message-bubble {
-      background-color: #ffffff;
-      border-radius: 1em;
-      padding: 1em 2em;
-      margin-top: 5vh;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      font-size: 1.25rem;
-      text-align: center;
-      max-width: 80%;
-    }
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
 
-    .image-container {
-      margin-top: 4vh;
-      max-width: 90%;
-    }
+.message-bubble {
+  background-color: #ffffff;
+  border-radius: 1em;
+  padding: 1em 2em;
+  margin-top: 5vh;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  font-size: 1.25rem;
+  text-align: center;
+  max-width: 80%;
+}
 
-    img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 1em;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
+.image-container {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 75vh;
+  width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
 
-    @media (max-width: 600px) {
-      .message-bubble {
-        font-size: 1rem;
-        padding: 0.75em 1.5em;
-      }
-    }
-  </style>
+img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 1em;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@media (max-width: 600px) {
+  .message-bubble {
+    font-size: 1rem;
+    padding: 0.75em 1.5em;
+  }
+}
+
 </head>
 <body>
   <div class="message-bubble">
