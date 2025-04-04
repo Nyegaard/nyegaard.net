@@ -13,6 +13,10 @@
       background-color: #f4f4f8;
       overflow: hidden;
       transition: background-color 0.3s ease, color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     body.dark {
@@ -51,7 +55,6 @@
       background-color: #ffffff;
       border-radius: 1em;
       padding: 1em 2em;
-      margin-top: 5vh;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       font-size: 1.25rem;
       text-align: center;
@@ -59,6 +62,7 @@
       z-index: 900;
       position: relative;
       transition: background-color 0.3s ease, color 0.3s ease;
+      margin-bottom: 2vh;
     }
 
     body.dark .message-bubble {
@@ -67,11 +71,11 @@
     }
 
     .image-container {
-      flex-grow: 1;
+      flex-grow: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      max-height: 75vh;
+      max-height: 60vh;
       width: 100%;
       padding: 1rem;
       box-sizing: border-box;
@@ -119,10 +123,19 @@
     <img src="cat.png" alt="Detective cat looking under a carpet" />
   </div>
 
-  <!-- Dark mode toggle logic -->
+  <!-- Dark mode toggle logic with localStorage -->
   <script>
+    const toggle = document.querySelector('.toggle');
+    const prefersDark = localStorage.getItem('darkMode') === 'true';
+
+    if (prefersDark) {
+      document.body.classList.add('dark');
+    }
+
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
     }
   </script>
 
