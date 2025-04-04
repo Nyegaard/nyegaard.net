@@ -159,6 +159,42 @@
         padding: 0.75em 1.5em;
       }
     }
+	.toggle.explode {
+	  animation: explode 0.5s forwards;
+	}
+
+	@keyframes explode {
+	  0% {
+		transform: scale(1) rotate(0deg);
+		opacity: 1;
+	  }
+	  50% {
+		transform: scale(1.5) rotate(90deg);
+		opacity: 0.6;
+	  }
+	  100% {
+		transform: scale(0) rotate(180deg);
+		opacity: 0;
+	  }
+	}
+	img.cat-vanish {
+	  animation: vanish 0.8s forwards;
+	}
+
+	img.cat-reappear {
+	  animation: reappear 0.6s forwards;
+	}
+
+	@keyframes vanish {
+	  0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+	  50%  { transform: scale(0.5) rotate(360deg); opacity: 0.5; }
+	  100% { transform: scale(0) rotate(720deg); opacity: 0; }
+	}
+
+	@keyframes reappear {
+	  0%   { transform: scale(0) rotate(-360deg); opacity: 0; }
+	  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+	}
   </style>
 </head>
 <body>
@@ -176,27 +212,53 @@
   </div>
 
   <!-- Dark mode toggle logic with localStorage -->
-  <script>
-    const toggle = document.querySelector('.toggle');
-    const prefersDark = localStorage.getItem('darkMode') === 'true';
+	<script>
+	  const toggleBtn = document.querySelector('.toggle');
+	  const prefersDark = localStorage.getItem('darkMode') === 'true';
 
-    if (prefersDark) {
-      document.body.classList.add('dark');
-    }
+	  if (prefersDark) {
+		document.body.classList.add('dark');
+	  }
 
-	function toggleDarkMode() {
-	  document.body.classList.toggle('dark');
-	  const isDark = document.body.classList.contains('dark');
-	  localStorage.setItem('darkMode', isDark);
+	  function toggleDarkMode() {
+		document.body.classList.toggle('dark');
+		const isDark = document.body.classList.contains('dark');
+		localStorage.setItem('darkMode', isDark);
 
-	  // Show cat memory message
-	  const msg = document.getElementById('catMemory');
-	  msg.classList.add('show');
-	  setTimeout(() => {
-		msg.classList.remove('show');
-	  }, 2000);
-	}
-  </script>
+		// 💾 Cat memory save effect
+		const msg = document.getElementById('catMemory');
+		msg.classList.add('show');
+		setTimeout(() => msg.classList.remove('show'), 2000);
+
+		// 💥 Explode the button
+		toggleBtn.classList.add('explode');
+		toggleBtn.disabled = true; // prevent rapid clicks
+
+		setTimeout(() => {
+		  toggleBtn.classList.remove('explode');
+		  toggleBtn.disabled = false;
+		}, 600); // restore button after explosion
+	  }
+	</script>
+	<script>
+	  const catImg = document.querySelector('img');
+
+	  catImg.addEventListener('click', () => {
+		// Prevent spamming
+		if (catImg.classList.contains('cat-vanish')) return;
+
+		catImg.classList.add('cat-vanish');
+
+		setTimeout(() => {
+		  catImg.classList.remove('cat-vanish');
+		  catImg.classList.add('cat-reappear');
+		}, 900);
+
+		setTimeout(() => {
+		  catImg.classList.remove('cat-reappear');
+		}, 1600);
+	  });
+	</script>
 
   <!-- 💬 Zisson Chat Widget -->
   <script type="text/javascript">
