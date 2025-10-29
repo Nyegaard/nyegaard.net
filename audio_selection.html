@@ -62,50 +62,40 @@
         <button id="test-button">Test Lyd</button>
     </div>
 
-    <audio id="audio-player"></audio>
-
     <script>
         const audioInSelect = document.getElementById('audio-in-select');
         const audioOutSelect = document.getElementById('audio-out-select');
         const testButton = document.getElementById('test-button');
-        const audioPlayer = document.getElementById('audio-player');
+
+        // Opprett en AudioContext. Denne vil vi rute til riktig høyttaler.
+        let audioContext; 
 
         const SAVED_AUDIO_IN_ID = 'persistent-audio-in-id';
         const SAVED_AUDIO_OUT_ID = 'persistent-audio-out-id';
-
-        // *** ENDRING HER ***
-        // Bytter fra en lang audio/mpeg (MP3) til en kort, universell audio/wav (Beep)
-        audioPlayer.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
         // 1. Hovedfunksjon for å hente og populere enheter
         async function getAndPopulateDevices() {
             console.log('Oppdaterer enhetsliste...');
 
-            // Tøm listene
             audioInSelect.innerHTML = '';
             audioOutSelect.innerHTML = '';
 
             try {
-                // VIKTIG: Vi må be om 'getUserMedia' én gang for å få tillatelse.
-                // Uten tillatelse, vil 'enumerateDevices' returnere tomme 'label' felt.
+                // Må fortsatt be om tillatelse for å få enhetsnavn OG for å bruke setSinkId
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
 
-                // Hent alle enheter
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 
-                // Last lagrede ID-er
                 const savedAudioInId = localStorage.getItem(SAVED_AUDIO_IN_ID);
                 const savedAudioOutId = localStorage.getItem(SAVED_AUDIO_OUT_ID);
                 
                 let foundSavedIn = false;
                 let foundSavedOut = false;
 
-                // Lag standard-valg
                 audioInSelect.appendChild(createOption('', 'Standard mikrofon'));
                 audioOutSelect.appendChild(createOption('', 'Standard høyttaler'));
 
-                // Fyll listene
                 for (const device of devices) {
                     if (device.kind === 'audioinput') {
                         const option = createOption(device.deviceId, device.label || `Mikrofon ${audioInSelect.length}`);
@@ -123,12 +113,11 @@
                         audioOutSelect.appendChild(option);
                     }
                 }
-
-                // Hvis lagret ID ikke ble funnet (frakoblet), fjern den fra storage
+                
                 if (!foundSavedIn) localStorage.removeItem(SAVED_AUDIO_IN_ID);
                 if (!foundSavedOut) localStorage.removeItem(SAVED_AUDIO_OUT_ID);
                 
-                // Anvend den lagrede (eller standard) høyttaleren
+                // Klargjør lydmotoren med riktig output-enhet
                 await setAudioOutput();
 
             } catch (err) {
@@ -155,30 +144,67 @@
             }
         }
 
-        // 3. Funksjon for å SETTE høyttalervalg
+        // 3. Funksjon for å SETTE høyttalervalg (MODIFISERT)
         async function setAudioOutput() {
             const deviceId = audioOutSelect.value;
             console.log('Setter høyttaler:', deviceId);
             
-            // Lagre valget for "permanens"
-            if (deviceId) {
-                localStorage.setItem(SAVED_AUDIO_OUT_ID, deviceId);
-            } else {
-                localStorage.removeItem(SAVED_AUDIO_OUT_ID);
+            // Lagre valget
+            localStorage.setItem(SAVED_AUDIO_OUT_ID, deviceId || '');
+
+            // Initialiser AudioContext hvis den ikke finnes
+            if (!audioContext) {
+                await initAudioContext();
             }
 
-            // Sjekk om setSinkId er støttet
-            if (typeof audioPlayer.setSinkId !== 'function') {
-                console.warn('setSinkId() er ikke støttet i denne nettleseren.');
-                return;
+            // Bytt enhet på den eksisterende AudioContext-en
+            if (audioContext && typeof audioContext.setSinkId === 'function') {
+                try {
+                    await audioContext.setSinkId(deviceId);
+                    console.log(`Lyd-output satt til: ${audioContext.sinkId}`);
+                } catch (err) {
+                    console.error('Feil ved setting av sinkId:', err);
+                }
+            }
+        }
+
+        // Funksjon for å initialisere AudioContext (må skje etter brukerinteraksjon)
+        async function initAudioContext() {
+            if (audioContext) {
+                 // Hvis den er "suspended", gjenoppta den
+                if (audioContext.state === 'suspended') {
+                    console.log('Gjenopptar AudioContext');
+                    await audioContext.resume();
+                }
+                return; // Allerede initialisert
             }
 
+            console.log("Initialiserer AudioContext for første gang");
+            const deviceId = audioOutSelect.value;
+            
             try {
-                // Her settes output-enhet!
-                await audioPlayer.setSinkId(deviceId);
-                console.log(`Lyd-output satt til: ${deviceId || 'default'}`);
+                const contextOptions = {
+                    sampleRate: 44100 // Standard
+                };
+
+                // 'sinkId' kan bare settes hvis vi har en spesifikk ID.
+                // 'default' (tom streng) er standard uansett.
+                if (deviceId) {
+                    contextOptions.sinkId = deviceId;
+                }
+                
+                audioContext = new AudioContext(contextOptions);
+                
+                // Hvis sinkId ikke kunne settes i konstruktøren (eldre nettlesere), bruk setSinkId
+                if (deviceId && typeof audioContext.setSinkId === 'function' && audioContext.sinkId !== deviceId) {
+                    console.log('Bruker setSinkId() for å sette output...');
+                    await audioContext.setSinkId(deviceId);
+                }
+                console.log(`AudioContext er klar. Output: ${audioContext.sinkId}`);
+
             } catch (err) {
-                console.error('Feil ved setting av sinkId:', err);
+                console.error("Feil ved opprettelse av AudioContext:", err);
+                alert(`Kunne ikke initialisere lydmotor: ${err.message}`);
             }
         }
 
@@ -186,16 +212,48 @@
         audioInSelect.onchange = saveAudioInput;
         audioOutSelect.onchange = setAudioOutput;
         
-        testButton.onclick = () => {
+        // 5. Test-knapp (MODIFISERT)
+        testButton.onclick = async () => {
             console.log('Tester lyd...');
-            // Denne linjen (play()) var kilden til feilen.
-            audioPlayer.play();
+            
+            // Initialiser/gjenoppta AudioContext ved første klikk
+            // (Nettlesere blokkerer lyd til brukeren har klikket)
+            await initAudioContext();
+
+            if (!audioContext || audioContext.state === 'closed') {
+                console.error('AudioContext er ikke tilgjengelig.');
+                alert("Kunne ikke starte lydmotoren.");
+                return;
+            }
+
+            // Gjenoppta i tilfelle den ble suspendert
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            // Lag en tone
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'sine'; // En ren tone
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // 440 Hz (standard A)
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Volum (halv styrke)
+
+            // Koble sammen: Oscillator -> Gain -> Høyttaler (destination)
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // Start og stopp tonen
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5); // Spill i 0.5 sekunder
+            
+            console.log(`Spiller test-tone på ${audioContext.sinkId}`);
         };
 
-        // 5. Lytt etter at enheter kobles til/fra
+        // 6. Lytt etter at enheter kobles til/fra
         navigator.mediaDevices.ondevicechange = getAndPopulateDevices;
 
-        // 6. Start alt
+        // 7. Start alt
         getAndPopulateDevices();
 
     </script>
